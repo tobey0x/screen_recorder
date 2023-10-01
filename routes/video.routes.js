@@ -4,6 +4,6 @@ const videoController = require("../controllers/video.controller")
 
 
 router.post("/upload", videoController.uploadVideoChunk);
-router.get("videos/:id")
+router.get("videos/:id", videoController.getVideo);
 
 module.exports = router;
