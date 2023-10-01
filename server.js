@@ -3,7 +3,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const videoRoutes = require("./routes/video.routes")
-const errorHandler = require("./middleware")
+// const errorHandler = require("./middleware")
 
 
 
