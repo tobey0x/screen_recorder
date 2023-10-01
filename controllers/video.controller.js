@@ -1,10 +1,24 @@
 const fs = require("fs");
-const formidable = require("formidable");
+// const formidable = require("formidable");
+const multer = require("multer");
+
+const storage = multer.diskStorage({
+  destination: './uploads',
+  filename: (req, file, cb) => {
+    // Parse the filename from the request, if available
+    const filename = req.body.filename || 'recorded-video.webm'; 
+    cb(null, filename);
+  },
+});
+
+
+const upload = multer({ storage });
 
 const getVideo = (req, res) => {
-  const { filename } = req.filename;
-  const filePath = `./uploads${filename}`;
+  const { filename } = req.params;
+  const filePath = `./uploads/${filename}`;
 
+  // Check if the file exists
   if (fs.existsSync(filePath)) {
     const stat = fs.statSync(filePath);
 
@@ -20,40 +34,61 @@ const getVideo = (req, res) => {
   }
 };
 
+const uploadVideo = upload.single('video');
 
-const uploadVideoChunk = (req, res) => {
-  const { filename } = req.query;
+// const getVideo = (req, res) => {
+//   const { filename } = req.filename;
+//   const filePath = `./uploads${filename}`;
 
-  if (!filename) {
-    return res.status(400).send('Missing filename in query parameters.');
-  }
+//   if (fs.existsSync(filePath)) {
+//     const stat = fs.statSync(filePath);
 
-  const filePath = `./uploads/${filename}`;
-  const form = new formidable.IncomingForm();
+//     res.writeHead(200, {
+//       'Content-Type': 'video/webm',
+//       'Content-Length': stat.size,
+//     });
 
-  form.onPart = (part) => {
-    if (!part.filename) {
-      form._handlePart(part);
-    } else {
-      const writeStream = fs.createWriteStream(filePath, { flags: 'a' });
-      part.pipe(writeStream);
-    }
-  };
+//     const readStream = fs.createReadStream(filePath);
+//     readStream.pipe(res);
+//   } else {
+//     res.status(404).send('Video not found');
+//   }
+// };
 
-  form.on('end', () => {
-    console.log(`Recieved a chunk for ${filename}`);
-    res.status(200).send('Chunk received successfully');
-  });
 
-  form.on('error', (err) => {
-    console.error('Error recieving chunk', err);
-    res.status(500).send('Error receiving chunk');
-  });
+// const uploadVideoChunk = (req, res) => {
+//   const { filename } = req.query;
 
-  form.parse(req)
-};
+//   if (!filename) {
+//     return res.status(400).send('Missing filename in query parameters.');
+//   }
+
+//   const filePath = `./uploads/${filename}`;
+//   const form = new formidable.IncomingForm();
+
+//   form.onPart = (part) => {
+//     if (!part.filename) {
+//       form._handlePart(part);
+//     } else {
+//       const writeStream = fs.createWriteStream(filePath, { flags: 'a' });
+//       part.pipe(writeStream);
+//     }
+//   };
+
+//   form.on('end', () => {
+//     console.log(`Recieved a chunk for ${filename}`);
+//     res.status(200).send('Chunk received successfully');
+//   });
+
+//   form.on('error', (err) => {
+//     console.error('Error recieving chunk', err);
+//     res.status(500).send('Error receiving chunk');
+//   });
+
+//   form.parse(req)
+// };
 
 module.exports = {
   getVideo,
-  uploadVideoChunk,
+  uploadVideo,
 }
