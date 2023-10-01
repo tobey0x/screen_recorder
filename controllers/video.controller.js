@@ -1,21 +1,42 @@
 const fs = require("fs");
-// const formidable = require("formidable");
 const multer = require("multer");
 
+const videos = []
+
 const storage = multer.diskStorage({
-  destination: './uploads',
+  destination: (req, file, cb) => {
+    cb(null, 'uploads');
+  },
   filename: (req, file, cb) => {
-    // Parse the filename from the request, if available
-    const filename = req.body.filename || 'recorded-video.webm'; 
-    cb(null, filename);
+    const uniqueID = Date.now() + '-' + Math.random().toString(36).substring(7);
+    const fileName = uniqueID + path.extname(file.originalname);
+    videos.push({ id: uniqueID, filename: fileName });
+    cb(null, fileName);
   },
 });
 
-
 const upload = multer({ storage });
 
+const uploadVideo = upload.single('video');
+
+const uploadVideoChunk = (req, res) => {
+  try {
+    const uploadedVideo = videos.find((video) => video.filename === req.file.filename);
+
+    if (!uploadedVideo) {
+      throw new Error('Error processing the uploaded video');
+    }
+
+    res.json({ message: 'Video uploaded successfully', videoId: uploadedVideo.id });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
 const getVideo = (req, res) => {
-  const { filename } = req.params;
+  const { id } = req.params;
   const filePath = `./uploads/${filename}`;
 
   // Check if the file exists
@@ -34,61 +55,11 @@ const getVideo = (req, res) => {
   }
 };
 
-const uploadVideo = upload.single('video');
-
-// const getVideo = (req, res) => {
-//   const { filename } = req.filename;
-//   const filePath = `./uploads${filename}`;
-
-//   if (fs.existsSync(filePath)) {
-//     const stat = fs.statSync(filePath);
-
-//     res.writeHead(200, {
-//       'Content-Type': 'video/webm',
-//       'Content-Length': stat.size,
-//     });
-
-//     const readStream = fs.createReadStream(filePath);
-//     readStream.pipe(res);
-//   } else {
-//     res.status(404).send('Video not found');
-//   }
-// };
 
 
-// const uploadVideoChunk = (req, res) => {
-//   const { filename } = req.query;
-
-//   if (!filename) {
-//     return res.status(400).send('Missing filename in query parameters.');
-//   }
-
-//   const filePath = `./uploads/${filename}`;
-//   const form = new formidable.IncomingForm();
-
-//   form.onPart = (part) => {
-//     if (!part.filename) {
-//       form._handlePart(part);
-//     } else {
-//       const writeStream = fs.createWriteStream(filePath, { flags: 'a' });
-//       part.pipe(writeStream);
-//     }
-//   };
-
-//   form.on('end', () => {
-//     console.log(`Recieved a chunk for ${filename}`);
-//     res.status(200).send('Chunk received successfully');
-//   });
-
-//   form.on('error', (err) => {
-//     console.error('Error recieving chunk', err);
-//     res.status(500).send('Error receiving chunk');
-//   });
-
-//   form.parse(req)
-// };
 
 module.exports = {
   getVideo,
   uploadVideo,
+  uploadVideoChunk,
 }
