@@ -1,9 +1,9 @@
-const express = require("express");
+const express = require('express');
+const videoController = require('../controllers/video.controller');
+
 const router = express.Router();
-const videoController = require("../controllers/video.controller")
 
-
-router.post('/upload', videoController.uploadVideo, videoController.uploadVideoChunk);
-router.get("videos/:id", videoController.getVideo);
+router.get('/video/:filename', videoController.getVideo);
+router.post('/upload', videoController.uploadMiddleware, videoController.uploadVideo);
 
 module.exports = router;

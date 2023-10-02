@@ -1,65 +1,35 @@
-const fs = require("fs");
-const multer = require("multer");
+const fs = require('fs');
+const multer = require('multer');
 
-const videos = []
-
+// Setup Multer storage configuration
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads');
-  },
+  destination: './uploads',
   filename: (req, file, cb) => {
-    const uniqueID = Date.now() + '-' + Math.random().toString(36).substring(7);
-    const fileName = uniqueID + path.extname(file.originalname);
-    videos.push({ id: uniqueID, filename: fileName });
-    cb(null, fileName);
+    // Generate a unique filename based on the initial ID
+    const { id } = req.body;
+    const uniqueFilename = `${id}-${Date.now()}-${file.originalname}`;
+    cb(null, uniqueFilename);
   },
 });
-
 const upload = multer({ storage });
 
-const uploadVideo = upload.single('video');
-
-const uploadVideoChunk = (req, res) => {
-  try {
-    const uploadedVideo = videos.find((video) => video.filename === req.file.filename);
-
-    if (!uploadedVideo) {
-      throw new Error('Error processing the uploaded video');
-    }
-
-    res.json({ message: 'Video uploaded successfully', videoId: uploadedVideo.id });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: error.message });
-  }
+// Upload video
+const uploadVideo = (req, res) => {
+  res.status(200).send('Video uploaded successfully.');
 };
 
-
+// Serve a specific recorded video by filename
 const getVideo = (req, res) => {
-  const { id } = req.params;
+  const { filename } = req.params;
   const filePath = `./uploads/${filename}`;
-
-  // Check if the file exists
   if (fs.existsSync(filePath)) {
-    const stat = fs.statSync(filePath);
-
-    res.writeHead(200, {
-      'Content-Type': 'video/webm',
-      'Content-Length': stat.size,
-    });
-
-    const readStream = fs.createReadStream(filePath);
-    readStream.pipe(res);
-  } else {
-    res.status(404).send('Video not found');
+    return res.sendFile(filePath, { root: '.' });
   }
+  res.status(404).send('Video not found.');
 };
-
-
-
 
 module.exports = {
-  getVideo,
+  uploadMiddleware: upload.single('video'),
   uploadVideo,
-  uploadVideoChunk,
-}
+  getVideo,
+};

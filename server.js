@@ -1,29 +1,23 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const fs = require("fs");
-const cors = require("cors");
-const videoRoutes = require("./routes/video.routes");
-
+const express = require('express');
+const cors = require('cors');
+const videoRoutes = require('./routes/video.routes');
+const errorHandler = require('./middlewares/errorHandler');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const port = process.env.PORT || 3000;
 
-// Middleware for JSON parsing
-app.use(express.json());
-
-// Middleware for URL-encoded form data parsing
-app.use(express.urlencoded({ extended: true }));
-
+// Enable CORS for all routes
 app.use(cors());
 
-app.use(bodyParser.json());
+// Middleware to parse JSON request bodies
+app.use(express.json());
 
-// app.use(express.static('uploads'));
-
+// Routes
 app.use('/', videoRoutes);
 
+// Error handling middleware
+app.use(errorHandler);
 
-
-app.listen(PORT, () => {
-  console.log(`App running on ${PORT}`)
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });
