@@ -21,6 +21,13 @@ This backend server is designed to handle screen recording uploads and integrate
 
 This repository contains the backend API for uploading and serving video files. The API provides two main endpoints:
 
+## Base URL
+
+The base URL for all API endpoints is `https://screen-recorder-j9t3.onrender.com`.
+
+## Endpoints
+
+
 ## 1. Upload Video
 
 
