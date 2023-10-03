@@ -41,10 +41,19 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-
 // Upload video
 const uploadVideo = (req, res) => {
-  res.status(200).send('Video uploaded successfully.');
+   const { id, originalname, filename, size } = req.file;
+
+  // Return details of the saved file
+  const fileInfo = {
+    id,
+    originalname,
+    filename,
+    size,
+  };
+
+  res.status(200).json({ message: 'Video uploaded successfully', file: fileInfo });
 };
 
 // Serve a specific recorded video by filename
