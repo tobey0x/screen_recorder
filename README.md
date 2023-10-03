@@ -1,7 +1,7 @@
 ```sh
 # My Screen Recorder Backend
 
-This backend server is designed to handle screen recording uploads and integrate with WhisperAI for transcription.
+This backend server is designed to handle screen recording uploads.
 
 ## Getting Started
 
